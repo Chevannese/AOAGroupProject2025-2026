@@ -689,8 +689,7 @@ public class MainWindow extends JFrame {
 
          // Populate rows: Year = 1..years, Rate default 0.00
          for (int i = 1; i <= years; i++) {
-             model.addRow(new Object[] { new JLabel(Integer.toString(i)), 0.00 });
-             System.out.println(i + " / " + years);
+             model.addRow(new Object[] { i, 0.00 });
          }
 
          // Optional: move focus to the first rate cell for quick editing
@@ -725,112 +724,85 @@ public class MainWindow extends JFrame {
 		rightVar.add(variableScrollPane, gc5);
 
 
-	calcuBtn.addActionListener(e -> {
-	    // 1) Commit any in-progress edits in the table
-	    commitTableEdits(rateTable); // or stopEditing(rateTable);
-	
-	    // 2) Validate principal
-	    double principal;
-	    try {
-	        principal = Double.parseDouble(principalField.getText().trim());
-	        if (principal <= 0) {
-	            throw new NumberFormatException("Principal must be non-negative.");
-	        }
-	    } catch (NumberFormatException ex) {
-	        JOptionPane.showMessageDialog(
-	                principalField,
-	                "Please enter a valid, non-negative Initial Investment.",
-	                "Invalid Input",
-	                JOptionPane.ERROR_MESSAGE
-	        );
-	        principalField.requestFocusInWindow();
-	        return;
-	    }
-	
-	    // 3) Validate table rates and build rateList
-	    int rows = model.getRowCount();
-	    if (rows == 0) {
-	        JOptionPane.showMessageDialog(
-	                rateTable,
-	                "No rates found. Click 'Generate Rate Table' and enter rates.",
-	                "Missing Data",
-	                JOptionPane.WARNING_MESSAGE
-	        );
-	        return;
-	    }
-	
-	    double[] rateList = new double[rows];
-	    java.util.List<Integer> badRows = new java.util.ArrayList<>();
-	    StringBuilder errors = new StringBuilder();
-	
-	    for (int r = 0; r < rows; r++) {
-	        Object rateObj = model.getValueAt(r, 1); // Rate column
-	        if (rateObj == null) {
-	            errors.append(String.format("Row %d: Rate is empty.%n", r + 1));
-	            badRows.add(r);
-	            continue;
-	        }
-	
-	        double rateVal;
-	        try {
-	            if (rateObj instanceof Number) {
-	                rateVal = ((Number) rateObj).doubleValue();
-	            } else {
-	                rateVal = Double.parseDouble(rateObj.toString().trim());
-	            }
-	        } catch (NumberFormatException ex2) {
-	            errors.append(String.format("Row %d: Rate '%s' is not numeric.%n", r + 1, rateObj));
-	            badRows.add(r);
-	            continue;
-	        }
-	
-	
-	     // Bounds: percent format in [0, 100] → 0%..100%
+
+calcuBtn.addActionListener(e -> {
+    commitTableEdits(rateTable);
+
+    double principal;
+    try {
+        principal = Double.parseDouble(principalField.getText().trim());
+        if (principal < 0) throw new NumberFormatException("Principal must be non-negative.");
+    } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(principalField,
+                "Please enter a valid, non-negative Initial Investment.",
+                "Invalid Input", JOptionPane.ERROR_MESSAGE);
+        principalField.requestFocusInWindow();
+        return;
+    }
+
+    int rows = model.getRowCount();
+    if (rows == 0) {
+        JOptionPane.showMessageDialog(rateTable,
+                "No rates found. Click 'Generate Rate Table' and enter rates.",
+                "Missing Data", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    double[] rateList = new double[rows];
+    java.util.List<Integer> badRows = new java.util.ArrayList<>();
+    StringBuilder errors = new StringBuilder();
+
+    for (int r = 0; r < rows; r++) {
+        Object rateObj = model.getValueAt(r, 1);
+        if (rateObj == null) {
+            errors.append(String.format("Row %d: Rate is empty.%n", r + 1));
+            badRows.add(r);
+            continue;
+        }
+        double rateVal;
+        try {
+            rateVal = (rateObj instanceof Number)
+                    ? ((Number) rateObj).doubleValue()
+                    : Double.parseDouble(rateObj.toString().trim());
+        } catch (NumberFormatException ex2) {
+            errors.append(String.format("Row %d: Rate '%s' is not numeric.%n", r + 1, rateObj));
+            badRows.add(r);
+            continue;
+        }
+
+
+	     // Bounds: decimal format in [0.0, 1.0] → 0%..100% (non-negative only)
 	     if (Double.isNaN(rateVal) || Double.isInfinite(rateVal)) {
 	         errors.append(String.format("Row %d: Rate must be a finite number.%n", r + 1));
 	         badRows.add(r);
 	         continue;
 	     }
-	     if (rateVal < 0.0 || rateVal > 100.0) {
-	         errors.append(String.format("Row %d: Rate %.2f%% out of range [0, 100].%n", r + 1, rateVal));
+	     if (rateVal < 0.0 || rateVal > 1.0) {
+	         errors.append(String.format("Row %d: Rate %.4f out of range [0.0, 1.0].%n", r + 1, rateVal));
 	         badRows.add(r);
 	         continue;
 	     }
-	     rateList[r] = rateVal / 100.0; // convert percent → decimal
-	
-	
-	    }
-	
-	    if (!badRows.isEmpty()) {
-	        highlightInvalidRows(rateTable, badRows);
-	        JOptionPane.showMessageDialog(
-	                rateTable,
-	                errors.toString(),
-	                "Validation Errors",
-	                JOptionPane.ERROR_MESSAGE
-	        );
-	        return;
-	    } else {
-	        clearHighlight(rateTable);
-	    }
-	
-	    // 4) Compute final balance
-	    double finalBalance = variableInvestor(principal, rateList);
-	
-	    // 5) Update ending balance label
-	    endBalValueV.setText(String.format("$%,.2f", finalBalance));
-	
-	    // 6) Build and show the chart (choose one of your builders)
-	    // A) XY chart from rateList
-	    ChartPanel chartPanel = buildVariableXYChartFromRates(principal, rateList);
-	
-	    // B) Or Category chart directly from the table model
-	    // ChartPanel chartPanel = buildVariableChart(principal, model);
-	
-	    variableScrollPane.setViewportView(chartPanel);
-	    right.revalidate();
-	    right.repaint();
-	});
+
+        rateList[r] = rateVal;
+    }
+
+    if (!badRows.isEmpty()) {
+        highlightInvalidRows(rateTable, badRows);
+        JOptionPane.showMessageDialog(rateTable, errors.toString(),
+                "Validation Errors", JOptionPane.ERROR_MESSAGE);
+        return;
+    } else {
+        clearHighlight(rateTable);
+    }
+
+    double finalBalance = variableInvestor(principal, rateList);
+    endBalValueV.setText(String.format("$%,.2f", finalBalance));
+
+    ChartPanel chartPanel = buildVariableXYChartFromRates(principal, rateList);
+    variableScrollPane.setViewportView(chartPanel);
+    right.revalidate();
+    right.repaint();
+});
 
 
 	clearvBtn.addActionListener(e -> {
