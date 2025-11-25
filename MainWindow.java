@@ -485,15 +485,35 @@ public class MainWindow extends JFrame {
         		return;
         	}
         	
+
+        	
         	if(rate <= 0)
         	{
         		JOptionPane.showMessageDialog(fixedGrowthPage, "Interest Rate must be a postive number (numbers greater than 0)", "Warning", JOptionPane.WARNING_MESSAGE);
         		return;
         	}
         	
+        	if (rate > 1000) 
+        	{ 
+    			
+        		JOptionPane.showMessageDialog(fixedGrowthPage, "Rate is too large. Please use 1000 or less.", "Warning", JOptionPane.ERROR_MESSAGE);
+    		   
+    		    System.err.println("Rate is value too large. Please use 1000 or less.");
+        		return;
+        	}
+        	
+        	
         	if(years <= 0)
         	{
         		JOptionPane.showMessageDialog(fixedGrowthPage, "Years must be a postive number (numbers greater than 0)", "Warning", JOptionPane.WARNING_MESSAGE);
+        		return;
+        	}
+        	
+        	if (years > 1000) { // or any sensible limit
+    			
+        		JOptionPane.showMessageDialog(fixedGrowthPage, "Target Years is too large. Please use 1000 or less.", "Warning", JOptionPane.ERROR_MESSAGE);
+    		   
+    		    System.err.println("Target years is value too large. Please use 1000 or less.");
         		return;
         	}
         	
@@ -655,50 +675,7 @@ public class MainWindow extends JFrame {
 
 	leftVar.add(tableScroll, gc4);
 
-     // Action: generate a rate table template for the given number of years
-     generateBtn.addActionListener(e -> {
-         String yearsText = yearVField.getText().trim();
-         if (yearsText.isEmpty()) {
-             JOptionPane.showMessageDialog(
-                 leftVar,
-                 "Please enter the number of years.",
-                 "Input Required",
-                 JOptionPane.WARNING_MESSAGE
-             );
-             return;
-         }
-
-         int years;
-         try {
-             years = Integer.parseInt(yearsText);
-             if (years <= 0) {
-                 throw new NumberFormatException("Years must be positive.");
-             }
-         } catch (NumberFormatException ex) {
-             JOptionPane.showMessageDialog(
-                 leftVar,
-                 "Please enter a valid positive integer for years.",
-                 "Invalid Input",
-                 JOptionPane.ERROR_MESSAGE
-             );
-             return;
-         }
-
-         // Clear old data
-         model.setRowCount(0);
-
-         // Populate rows: Year = 1..years, Rate default 0.00
-         for (int i = 1; i <= years; i++) {
-             model.addRow(new Object[] { i, 0.00 });
-         }
-
-         // Optional: move focus to the first rate cell for quick editing
-         if (years > 0) {
-             rateTable.requestFocusInWindow();
-             rateTable.changeSelection(0, 1, false, false);
-             rateTable.editCellAt(0, 1);
-         }
-     });
+    
      // --- Add components to rightVar (your right side panel for variable growth) ---
 
      
@@ -780,8 +757,8 @@ calcuBtn.addActionListener(e -> {
 	         badRows.add(r);
 	         continue;
 	     }
-	     if (rateVal < 0.0 || rateVal > 1.0) {
-	         errors.append(String.format("Row %d: Rate %.4f out of range [0.0, 1.0].%n", r + 1, rateVal));
+	     if (rateVal < 0.0 || rateVal > 1000) {
+	         errors.append(String.format("Row %d: Rate %.4f out of range [0, 1000].%n", r + 1, rateVal));
 	         badRows.add(r);
 	         continue;
 	     }
@@ -806,6 +783,57 @@ calcuBtn.addActionListener(e -> {
     right.revalidate();
     right.repaint();
 });
+
+
+	// Action: generate a rate table template for the given number of years
+	generateBtn.addActionListener(e -> {
+	    String yearsText = yearVField.getText().trim();
+	    if (yearsText.isEmpty()) {
+	        JOptionPane.showMessageDialog(
+	            leftVar,
+	            "Please enter the number of years.",
+	            "Input Required",
+	            JOptionPane.WARNING_MESSAGE
+	        );
+	        return;
+	    }
+	
+	    int years;
+	    try {
+	        years = Integer.parseInt(yearsText);
+	        if (years <= 0 ) {
+	            throw new NumberFormatException("Years must be positive.");
+	        }
+	        if(years >  1000)
+	        {
+	            throw new NumberFormatException("Years cannot exceed 1000.");
+
+	        }
+	    } catch (NumberFormatException ex) {
+	        JOptionPane.showMessageDialog(
+	            leftVar,
+	            "Please enter a valid positive integer for years.",
+	            "Invalid Input",
+	            JOptionPane.ERROR_MESSAGE
+	        );
+	        return;
+	    }
+	
+	    // Clear old data
+	    model.setRowCount(0);
+	
+	    // Populate rows: Year = 1..years, Rate default 0.00
+	    for (int i = 1; i <= years; i++) {
+	        model.addRow(new Object[] { i, 0.00 });
+	    }
+	
+	    // Optional: move focus to the first rate cell for quick editing
+	    if (years > 0) {
+	        rateTable.requestFocusInWindow();
+	        rateTable.changeSelection(0, 1, false, false);
+	        rateTable.editCellAt(0, 1);
+	    }
+	});
 
 
 	clearvBtn.addActionListener(e -> {
@@ -983,6 +1011,16 @@ calcuBtn.addActionListener(e -> {
     		return;
     	}
     	
+    	if (rate > 1000) 
+    	{ 
+			
+    		JOptionPane.showMessageDialog(fixedGrowthPage, "Rate is too large. Please use 1000 or less.", "Warning", JOptionPane.ERROR_MESSAGE);
+		   
+		    System.err.println("Rate is value too large. Please use 1000 or less.");
+    		return;
+    	}
+    	
+    	
     	if(expense <= 0)
     	{
     		JOptionPane.showMessageDialog(fixedGrowthPage, "Expense must be a postive number (numbers greater than 0)", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -1007,6 +1045,7 @@ calcuBtn.addActionListener(e -> {
     	
     	finalYearValue.setText(String.valueOf(years));
     	
+    	//Sets final year to
     	if (finalYearValue.getText().contains("120"))
     	{
     		finalYearValue.setText("120 | Retirement funds will never deplete in lifetime");
@@ -1017,7 +1056,7 @@ calcuBtn.addActionListener(e -> {
 
     	// Build the series & chart
     	    List<Double> series = balanceSeries(principal, expense, rate);
-    	    JFreeChart chart = buildRetirementChartJFree(series);
+    	    JFreeChart chart = buildDepletionJFreeChart(series);
     	    ChartPanel chartPanel = new ChartPanel(chart);
 
     	    // Large preferred size so scroll bars are useful
@@ -1036,10 +1075,6 @@ calcuBtn.addActionListener(e -> {
 
 
     });
-    
-    
-    
-    
     
     backToMenuE.addActionListener(e->{
     	clearEBtn.doClick();
@@ -1216,11 +1251,32 @@ calcuBtn.addActionListener(e -> {
     		return;
     	}
     	
+    	if (rate > 1000) 
+    	{ 
+			
+    		JOptionPane.showMessageDialog(optimizePage, "Rate is too large. Please use 1000 or less.", "Warning", JOptionPane.ERROR_MESSAGE);
+		   
+		    System.err.println("Rate is value too large. Please use 1000 or less.");
+    		return;
+    	}
+    	
+    	
     	if(years <= 0)
     	{
     		JOptionPane.showMessageDialog(optimizePage, "Target Years must be a postive number (numbers greater than 0)", "Warning", JOptionPane.WARNING_MESSAGE);
     		return;
     	}
+    	
+
+		if (years > 1000) { // or any sensible limit
+			
+    		JOptionPane.showMessageDialog(optimizePage, "Target Years is too large. Please use 1000 or less.", "Warning", JOptionPane.ERROR_MESSAGE);
+		   
+		    System.err.println("Target years is value too large. Please use 1000 or less.");
+    		return;
+
+		}
+
     	
     	//Converts whole numbers into decimal format if it is > 1
     	//This allows both whole numbers and decimals to be used
@@ -1414,7 +1470,7 @@ calcuBtn.addActionListener(e -> {
 
 //This method builds retirement depletion chart
 
-public static JFreeChart buildRetirementChartJFree(List<Double> balances) {
+public static JFreeChart buildDepletionJFreeChart(List<Double> balances) {
     DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
     // Populate dataset using the balances list
