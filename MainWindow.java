@@ -78,8 +78,12 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private java.util.Set<Integer> invalidRowSet = new java.util.HashSet<>();
 
-	double rate, endBalance,expense,balance;
-	int years; 
+	static double principal;
+	static double rate;
+	double endBalance;
+	double expense;
+	double balance;
+	static int years; 
     private static DefaultTableModel model;
 
 	
@@ -979,7 +983,7 @@ public class MainWindow extends JFrame {
     	//Validation Check to see if the values in the fields are in number format
     	try
     	{
-    		 balance = Double.parseDouble(balanceField.getText());
+    		 principal = Double.parseDouble(balanceField.getText());
         	 expense = Double.parseDouble(expenseField.getText());
         	 rate  = Double.parseDouble(rateField.getText());
         	 
@@ -992,7 +996,7 @@ public class MainWindow extends JFrame {
     	}
     	
     	//Validation check to see if balance, rate, years are non-negative numbers
-    	if(balance <= 0)
+    	if(principal <= 0)
     	{
     		JOptionPane.showMessageDialog(fixedGrowthPage, "Initial Investment must be a postive number (numbers greater than 0)", "Warning", JOptionPane.WARNING_MESSAGE);
     		return;
@@ -1010,7 +1014,7 @@ public class MainWindow extends JFrame {
     		return;
     	}
     	
-    	if(expense > balance)
+    	if(expense > principal)
     	{
     		JOptionPane.showMessageDialog(fixedGrowthPage, "Expense cannot be higher than balance\nPlease enter either a lower expense or higher balance", "Warning", JOptionPane.WARNING_MESSAGE);
     		return;
@@ -1023,7 +1027,7 @@ public class MainWindow extends JFrame {
         }
     	
     	
-    	int years = finallyRetired( balance,  expense,  rate, 120);
+    	int years = finallyRetired( principal,  expense,  rate, 120);
     	
     	finalYearValue.setText(String.valueOf(years));
     	
@@ -1031,7 +1035,7 @@ public class MainWindow extends JFrame {
 
 
     	// Build the series & chart
-    	    List<Double> series = balanceSeries(balance, expense, rate);
+    	    List<Double> series = balanceSeries(principal, expense, rate);
     	    JFreeChart chart = buildRetirementChartJFree(series);
     	    ChartPanel chartPanel = new ChartPanel(chart);
 
@@ -1428,33 +1432,38 @@ public class MainWindow extends JFrame {
 	}
 
 //This method builds retirement depletion chart
-public static JFreeChart buildRetirementChartJFree(List<Double> balances) {
-    XYSeries series = new XYSeries("Balance");
-    for (int year = 0; year < balances.size(); year++) {
-        series.add(year, balances.get(year));
-    }
-    XYSeriesCollection dataset = new XYSeriesCollection(series);
 
-    JFreeChart chart = ChartFactory.createXYLineChart(
-            "Balance Over Time Until Depletion", // title
-            "Years",                              // x-axis
-            "Balance",                            // y-axis
+public static JFreeChart buildRetirementChartJFree(List<Double> balances) {
+    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+    // Populate dataset using the balances list
+    for (int i = 0; i < balances.size(); i++) {
+        int year = i + 1; // Year starts at 1
+        dataset.addValue(balances.get(i), "Investment Growth", String.valueOf(year));
+    }
+
+    // Create a category line chart
+    JFreeChart chart = ChartFactory.createLineChart(
+            "Investment Growth Over Time",
+            "Year",
+            "Balance ($)",
             dataset
     );
 
-    // Light visual polish
-    XYPlot plot = chart.getXYPlot();
-    XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false); // line only
-    renderer.setSeriesPaint(0, new Color(33, 150, 243));  // blue line
-    plot.setRenderer(renderer);
+    // Styling
+    CategoryPlot plot = chart.getCategoryPlot();
+    plot.setBackgroundPaint(java.awt.Color.WHITE);
+    plot.setDomainGridlinesVisible(true);
+    plot.setDomainGridlinePaint(new java.awt.Color(210, 210, 210));
+    plot.setRangeGridlinePaint(new java.awt.Color(210, 210, 210));
 
-    plot.setBackgroundPaint(Color.WHITE);
-    plot.setDomainGridlinePaint(new Color(200, 200, 200));
-    plot.setRangeGridlinePaint(new Color(200, 200, 200));
-    plot.setAxisOffset(new RectangleInsets(5, 5, 5, 5));
+    // Currency formatting on Y-axis
+    org.jfree.chart.axis.NumberAxis rangeAxis = (org.jfree.chart.axis.NumberAxis) plot.getRangeAxis();
+    rangeAxis.setNumberFormatOverride(NumberFormat.getCurrencyInstance(Locale.getDefault()));
 
     return chart;
 }
+
 
 
 //helper function of retirement depletion chart
