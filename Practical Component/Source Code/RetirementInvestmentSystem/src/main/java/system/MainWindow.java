@@ -22,7 +22,7 @@ GROUP MEMBERS & CONTRIBUTIONS:
 | Marco Mclean (2209181)     | Project Lead, Binary Search Algorithm Implementation    |
 | Andre Campbell (2301103)   | Fixed & Variable Simulation Logic, Mathematical Models  |
 | Chevannese Ellis (2301109) | User Interface (GUI) Design & Input Error Handling      |
-| Shanika McLeggan           | Theory Component, Complexity Analysis & Documentation   |
+| Shanika McLeggan (1503802)           |   													  |
 ---------------------------------------------------------------------------------------
 
 AI USAGE STATEMENT (Rubric Criterion #5):
@@ -1136,11 +1136,11 @@ calcuBtn.addActionListener(e -> {
 	JLabel resultsOp = new JLabel("Results");
 	resultsOp.setFont(new Font("Arial", Font.BOLD, 20));
 	
-	JLabel annualWithdrawlLabel = new JLabel("Optimial Annual Withdrawal:");
+	JLabel annualWithdrawlLabel = new JLabel("Optimization Withdrawal:");
 	annualWithdrawlLabel.setFont(new Font("Arial", Font.BOLD, 13));
 	
 	JLabel annualWithdrawlValue = new JLabel("$");
-	annualWithdrawlValue.setFont(new Font("Arial", Font.BOLD, 20));
+	annualWithdrawlValue.setFont(new Font("Arial", Font.BOLD, 15));
     
     //Uses addToGridBag method to add components to left side of Optimization Withdrawal Page
 
@@ -1161,9 +1161,9 @@ calcuBtn.addActionListener(e -> {
     addToGridBag(leftOp,targetYearLabel,gc8,0,5,1,1);
     addToGridBag(leftOp,targetYearField,gc8,1,5,1,1);
 
-    addToGridBag(leftOp,calculateOp,gc8,0,6,3,1);
-    addToGridBag(leftOp,clearOpBtn,gc8,0,7,3,1);
-    addToGridBag(leftOp,backToMenuOp,gc8,0,8,3,1);
+    addToGridBag(leftOp,calculateOp,gc8,1,6,1,1);
+    addToGridBag(leftOp,clearOpBtn,gc8,1,7,1,1);
+    addToGridBag(leftOp,backToMenuOp,gc8,1,8,1,1);
     
     //Uses addToGridBag method to add components to right side of Optimization Withdrawal Page
 
