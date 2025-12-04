@@ -94,8 +94,7 @@ public class MainWindow extends JFrame {
         Returns: (balance)
         */
 		
-		double balance = 0;
-		balance = principal;
+		double balance = principal;
 		for (int i = 1; i <= years; i++)
 		{
 			balance = balance * (1 + rate);
@@ -112,13 +111,12 @@ public class MainWindow extends JFrame {
 	    Complexity: O(N) - Linear Time based on list size
 	    Returns: (balance)
 	    """*/
-		double balance = 0;
-		balance = principal;
-		for (double rate : rate_list)
-		{
-			balance = balance * (1 + rate);
-		}	 
-		return balance;
+		double balance = principal; 
+	    for (double rate : rate_list)
+	    {
+	        balance = balance * (1 + rate);
+	    }	 
+	    return balance;
 	}
 	
 
@@ -1061,7 +1059,7 @@ calcuBtn.addActionListener(e -> {
     	    ChartPanel chartPanel = new ChartPanel(chart);
 
     	    // Large preferred size so scroll bars are useful
-    	    chartPanel.setPreferredSize(new Dimension(1200, 800));
+    	    chartPanel.setPreferredSize(new Dimension(700, 400));
     	    chartPanel.setMouseWheelEnabled(true);
     	    chartPanel.setDomainZoomable(true);
     	    chartPanel.setRangeZoomable(true);
@@ -1303,7 +1301,7 @@ calcuBtn.addActionListener(e -> {
 
     	// 3) Build the chart that matches the screenshot
     	ChartPanel chartPanel = new ChartPanel(chart);
-    	chartPanel.setPreferredSize(new Dimension(1200, 800));
+    	chartPanel.setPreferredSize(new Dimension(700, 400));
     	chartPanel.setMouseWheelEnabled(true);
     	chartPanel.setDomainZoomable(true);
     	chartPanel.setRangeZoomable(true);
@@ -1415,7 +1413,7 @@ calcuBtn.addActionListener(e -> {
 	    plot.setRenderer(renderer);
 
 	    ChartPanel chartPanel = new ChartPanel(chart);
-	    chartPanel.setPreferredSize(new Dimension(900, 600)); // large -> scrollbars appear
+	    chartPanel.setPreferredSize(new Dimension(700, 400)); // large -> scrollbars appear
 	    chartPanel.setMouseWheelEnabled(true);
 	    chartPanel.setDomainZoomable(true);
 	    chartPanel.setRangeZoomable(true);
